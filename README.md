@@ -1,6 +1,6 @@
 # Epic Games Store Weekly Free Game Claimer
 
-This project is based (and a few functions just straight up copied) on [this repository by MasonStooksbury](https://github.com/MasonStooksbury/Free-Games-V2/blob/main/README.md). That repo is a free games claimer for the epic games desktop app with login included, however, i use linux and the [Heroic Games Launcher](https://heroicgameslauncher.com/) so it's modified to work with that but i am kinda new to python and linux so may be very buggy (check the [caveats](./README.md#caveats)).
+This project is based (and a few functions just straight up copied) on [this repository by MasonStooksbury](https://github.com/MasonStooksbury/Free-Games-V2/blob/main/README.md). That repo is a free games claimer for the epic games desktop app with login included, however, i use linux and the [Heroic Games Launcher](https://heroicgameslauncher.com/) so it's modified to work with that but i am kinda new to python and linux so may be very buggy (check the [caveats](#caveats)).
 
 Any bugfix or improvement is welcomed, just raise an issue or make a pull request and i'll get to it when i have the time.
 
@@ -49,7 +49,7 @@ You can add this into your cronjobs to execute this script weekly (run `crontab 
 30 13 * * thu python3 /path/to/script/claimer.py
 ```
 
-If you got the error i talked about in [usage section](./README.md#usage) then you can make a script to execute `xhost +` right before running `claimer.py` and `xhost -` right after, like this:
+If you got the error i talked about in [usage section](#usage) then you can make a script to execute `xhost +` right before running `claimer.py` and `xhost -` right after, like this:
 ```shell
 #!/bin/bash
 xhost +
