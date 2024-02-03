@@ -26,12 +26,10 @@ def exit_with_error(error, line_number):
 # Function to easily capture screenshots
 def captureScreenshot():
     # Capture the entire screen, convert to a numpy array, then convert to OpenCV format
-    logger(getframeinfo(currentframe()).lineno, "Taking screenshot...")
     return cv2.cvtColor(np.array(ImageGrab.grab()), cv2.COLOR_RGB2BGR)
 
 
 def findTemplateInScreenshot(screenshot, template_path):
-    logger(getframeinfo(currentframe()).lineno, "Looking for template in screenshot...")
     # Read the template image
     template = cv2.imread(template_path, 0)
     template_w, template_h = template.shape[::-1]
@@ -55,12 +53,143 @@ def findTemplateInScreenshot(screenshot, template_path):
         # Draw a green rectangle around the matched area
         # cv2.rectangle(screenshot, top_left, bottom_right, (0, 255, 0), 2)
 
-        logger(getframeinfo(currentframe()).lineno, "Found.")
         return screenshot, (center_x, center_y)
     else:
-        logger(getframeinfo(currentframe()).lineno, "Not Found.")
         return None, None
 
+# Grab the free game
+def grabFreeGame():
+    # Make sure we are scrolled to the very top. Since we don't know how far down we are, let's pick some astronomical number to be sure
+    pag.scroll(10000)
+    found = False
+    coords = ""
+
+    # Focus on the store tab (we're on the menu, we selected the store)
+    matched_image, coords = findTemplateInScreenshot(
+            captureScreenshot(),
+            str(Path("templates").joinpath("store_link.png")),
+        )
+    
+    if matched_image is not None:
+            # click so scroll works
+            pag.click(x=coords[0], y=coords[1])
+            sleep(1)
+    else:
+        exit_with_error('Something went wrong, store link on the page not found.', getframeinfo(currentframe()).lineno)
+
+    # Search for, then click the 'Free Now' button on the game
+    while not found:
+        matched_image, center_coordinates = findTemplateInScreenshot(
+            captureScreenshot(),
+            str(Path("templates").joinpath("free_game_button.png")),
+        )
+
+        sleep(1.5)
+
+        if matched_image is not None:
+            found = True
+            coords = center_coordinates
+            break
+
+        # May want to modify this, don't what screen MasonStooksbury has that he had this with -750, was to much for me
+        pag.scroll(-5)
+
+    if found:
+        # added -100 don't know why it is needed but pag would click right under the game (something to do with how linux displays things?)
+        pag.click(x=coords[0], y=coords[1] - 100)
+        sleep(7)
+    else:
+        exit_with_error(
+            "Free Game button not found.", getframeinfo(currentframe()).lineno
+        )
+
+    # Navigate Mature Content Warning screen
+    matched_image, coords = findTemplateInScreenshot(
+        captureScreenshot(),
+        str(Path("templates").joinpath("continue_after_warning_button.png")),
+    )
+
+    if matched_image is not None:
+        pag.click(x=coords[0], y=coords[1])
+        sleep(5)
+    else:
+        logger(getframeinfo(currentframe()).lineno, "No Mature Content Warning screen, continuing...")
+
+    # If game is already in library just return
+    matched_image, coords = findTemplateInScreenshot(
+        captureScreenshot(), str(Path("templates").joinpath("already_in_library_tag.png"))
+    )
+
+    if matched_image is not None:
+        logger(getframeinfo(currentframe()).lineno, "Game already in library")
+        return None
+
+    # Find and click 'Get'
+    matched_image, coords = findTemplateInScreenshot(
+        captureScreenshot(), str(Path("templates").joinpath("get_game_button.png"))
+    )
+
+    if matched_image is not None:
+        pag.click(x=coords[0], y=coords[1])
+        sleep(5)
+    else:
+        exit_with_error(
+            "Couldn't find 'Get' button.", getframeinfo(currentframe()).lineno
+        )
+
+    # Fill out EULA if available
+    # matched_image, coords = findTemplateInScreenshot(
+    #     captureScreenshot(), str(Path("templates").joinpath("eula_checkbox.png"))
+    # )
+
+    # if matched_image is not None:
+    #     pag.click(x=coords[0], y=coords[1])
+    #     sleep(2)
+    #     matched_image, coords = findTemplateInScreenshot(
+    #         captureScreenshot(),
+    #         str(Path("templates").joinpath("eula_accept_button.png")),
+    #     )
+    #     if matched_image is not None:
+    #         pag.click(x=coords[0], y=coords[1])
+    #         sleep(5)
+    # else:
+    #     logger(getframeinfo(currentframe()).lineno, "No EULA, continuing...")
+
+    # Find and click 'Place Order'
+    matched_image, coords = findTemplateInScreenshot(
+        captureScreenshot(),
+        str(Path("templates").joinpath("place_order_button.png")),
+    )
+
+    if matched_image is not None:
+        pag.click(x=coords[0], y=coords[1])
+        sleep(5)
+    else:
+        exit_with_error(
+            "Couldn't find 'Place Order' button.", getframeinfo(currentframe()).lineno
+        )
+
+    # Check if it was 'purchased'
+    matched_image, coords = findTemplateInScreenshot(
+        captureScreenshot(),
+        str(Path("templates").joinpath("thank_you_for_your_order_title.png")),
+    )
+
+    if matched_image is None:
+        logger(getframeinfo(currentframe()).lineno, "Claim may not have been completed, you should check just in case.")
+        return None
+
+    matched_image, coords = findTemplateInScreenshot(
+        captureScreenshot(),
+        str(Path("templates").joinpath("continue_browsing_button.png")),
+    )
+
+    if matched_image is not None:
+        pag.click(x=coords[0], y=coords[1])
+        sleep(5)
+        logger(getframeinfo(currentframe()).lineno, "Finished claiming game.")
+
+    return None
 
 verbose = True if len(sys.argv) > 1 and (sys.argv[1] == '-v' or sys.argv[1] == '--verbose') else False
 
@@ -91,8 +220,12 @@ if matched_image is None:
 # Otherwise, make sure the window is focused, then get our free game
 else:
     pag.click(x=coords[0], y=coords[1])
-    sleep(2)
+    sleep(5)
 
-# For now just open, go to store and close
-logger(getframeinfo(currentframe()).lineno, "Finished. Exiting...")
+# Look for and get the free game
+logger(getframeinfo(currentframe()).lineno, "Grabbing free game...")
+grabFreeGame()
+
+# Finished
+logger(getframeinfo(currentframe()).lineno, "Exiting...")
 sys.exit()
