@@ -91,11 +91,11 @@ def grabFreeGame():
             coords = center_coordinates
             break
 
-        # May want to modify this, don't what screen MasonStooksbury has that he had this with -750, was to much for me
+        # MAY_MODIFY May want to modify this, don't what screen MasonStooksbury has that he had this with -750, was to much for me
         pag.scroll(-5)
 
     if found:
-        # added -100 don't know why it is needed but pag would click right under the game (something to do with how linux displays things?)
+        # MAY_MODIFY added -100 don't know why it is needed but pag would click right under the game (something to do with how linux displays things?)
         pag.click(x=coords[0], y=coords[1] - 100)
         sleep(7)
     else:
