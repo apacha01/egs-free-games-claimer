@@ -111,6 +111,7 @@ def grabFreeGame():
 
     if matched_image is not None:
         pag.click(x=coords[0], y=coords[1])
+        logger(getframeinfo(currentframe()).lineno, "Navigated through Mature Content Warning screen, continuing...")
         sleep(5)
     else:
         logger(getframeinfo(currentframe()).lineno, "No Mature Content Warning screen, continuing...")
