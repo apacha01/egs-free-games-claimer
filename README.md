@@ -28,6 +28,10 @@ The script will open heroic games launcher with the `subprocess` module (it assu
 
 This doesn't include login since when opening the Heroic Games Launcher (at least for me), the session is still open. So feel free to fork the repo if you need login. Based on this and MasonStooksbury's repo it should be fairly ease.
 
+### CLI args
+
+* `-v` / `--verbose`: for verbose mode, it would redirect the output from the `heroic` command into the terminal where this file is being executed
+
 ## Schedule to run automatically
 
 I use `cron` to run this weekly (as of feb 2 2024 games are released every thursday at 1:00 PM).
