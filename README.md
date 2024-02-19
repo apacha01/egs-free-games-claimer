@@ -92,3 +92,4 @@ If you know how to solve any of this, then please tell or just make a pull reque
 ## TODO
 
 * Test/Trim sleep times in between actions to make it faster.
+* Make it work 🙃, sometimes it doesn't find the get button for some reason, when it's yellow for example (even though it's converting everything to gray scale).
